@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16.4-alpine
+    container_name: dalabio_postgres
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: dalabio
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d  # Mount the init.sql script
+    networks:
+      - dalabio_network
+
+  app:
+    build:
+      context: ..
+      dockerfile: build/Dockerfile
+    container_name: dalabio_app
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: dalabio
+      DB_SSLMODE: disable
+    volumes:
+      - ../pkg/config/.env:/app/.env
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
+    networks:
+      - dalabio_network
+    command: ["./dalabio"]
+
+volumes:
+  postgres_data:
+
+networks:
+  dalabio_network:
+    driver: bridge
