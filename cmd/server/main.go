@@ -10,6 +10,7 @@ import (
 	"dalabio/internal/service"
 	"dalabio/pkg/config"
 
+	"github.com/gin-contrib/cors" // Import CORS package
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -33,13 +34,13 @@ func main() {
 	// Connect to the database
 	database, err := db.ConnectDB(dbConfig)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Error connecting to the database:", err)
 	}
 	defer database.Close()
 
 	// Create the required tables if they don't exist
 	if err := db.CreateTables(database); err != nil {
-		log.Fatal(err)
+		log.Fatal("Error creating tables:", err)
 	}
 
 	// Initialize the repositories
@@ -54,6 +55,15 @@ func main() {
 
 	// Initialize Gin router
 	r := gin.Default()
+
+	// Apply CORS middleware
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000", "https://your-frontend-domain.com"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
 
 	// Register user-related routes with token repository for middleware
 	routes.RegisterUserRoutes(r, userController, tokenRepository)

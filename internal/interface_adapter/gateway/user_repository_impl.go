@@ -175,3 +175,28 @@ func (r *userRepositoryImpl) FindByEmail(email string) (*entity.User, error) {
 func (r *userRepositoryImpl) ListAll() ([]*entity.User, error) {
 	panic("unimplemented")
 }
+
+// get all users
+func (r *userRepositoryImpl) GetAll() ([]*entity.User, error) {
+
+	// Fetch all users from the database
+	rows, err := r.db.Query("SELECT id, username, email, password, first_name, last_name, is_active, created_at, updated_at FROM users")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Scan the rows into a slice of User structs
+	var users []*entity.User
+	for rows.Next() {
+		var user entity.User
+		err := rows.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.FirstName, &user.LastName, &user.IsActive, &user.CreatedAt, &user.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, &user)
+	}
+
+	// Check for any errors during the scan
+	return users, nil
+}
