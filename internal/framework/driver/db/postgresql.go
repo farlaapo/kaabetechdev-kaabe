@@ -43,6 +43,16 @@ func CreateTables(db *sql.DB) error {
 		deleted_at TIMESTAMP NULL
 	);`
 
+	courseTable := ` CREATE TABLE IF NOT EXISTS course (
+		id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+		title VARCHAR(255) NOT NULL,
+		description TEXT,
+		duration VARCHAR(255) NOT NULL,
+		start_date TIMESTAMP NOT NULL,
+		end_date TIMESTAMP NOT NULL,
+		instructor VARCHAR(255) NOT NULL
+		)`
+
 	tokenTable := `CREATE TABLE IF NOT EXISTS tokens (
 		id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
 		user_id UUID REFERENCES users(id) ON DELETE CASCADE,
@@ -80,7 +90,7 @@ func CreateTables(db *sql.DB) error {
 	);`
 
 	// Execute the table creation queries
-	queries := []string{userTable, tokenTable, roleTable, permissionTable, userRoleTable, userPermissionTable}
+	queries := []string{userTable, tokenTable, roleTable, permissionTable, userRoleTable, userPermissionTable, courseTable}
 	for _, query := range queries {
 		if _, err := db.Exec(query); err != nil {
 			return fmt.Errorf("failed to create table: %v", err)
