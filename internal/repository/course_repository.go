@@ -6,10 +6,10 @@ import (
 	"github.com/gofrs/uuid"
 )
 
+// CourseRepository interface with required methods
 type CourseRepository interface {
-	Create(user *entity.Course) error
-	Update(user *entity.Course) error
-	Delete(userID uuid.UUID) error
-	FindByID(userID uuid.UUID) (*entity.Course, error)
-	ListAll() ([]*entity.Course, error)
+	Create(course *entity.Course) error
+	Update(course *entity.Course) error
+	Delete(courseID uuid.UUID) error
+	FindByID(courseID uuid.UUID) (*entity.Course, error)
 }
