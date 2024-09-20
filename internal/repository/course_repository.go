@@ -11,5 +11,5 @@ type CourseRepository interface {
 	Create(course *entity.Course) error
 	Update(course *entity.Course) error
 	Delete(courseID uuid.UUID) error
-	FindByID(courseID uuid.UUID) (*entity.Course, error)
+	GetdByID(courseID uuid.UUID) (*entity.Course, error)
 }

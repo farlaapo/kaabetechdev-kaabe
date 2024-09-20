@@ -46,12 +46,15 @@ func main() {
 	// Initialize the repositories
 	userRepository := gateway.NewUserRepository(database)
 	tokenRepository := gateway.NewTokenRepository(database)
+	courseRepository := gateway.NewCourseRepository(database)
 
 	// Initialize the services
 	userService := service.NewUserService(userRepository, tokenRepository)
+	courseService := service.NewCourseService(courseRepository, tokenRepository)
 
 	// Initialize the controllers
 	userController := controller.NewUserController(userService)
+	courseController := controller.NewCourseController(courseService)
 
 	// Initialize Gin router
 	r := gin.Default()
@@ -67,6 +70,7 @@ func main() {
 
 	// Register user-related routes with token repository for middleware
 	routes.RegisterUserRoutes(r, userController, tokenRepository)
+	routes.RegisterCoursesRoutes(r, courseController, tokenRepository)
 
 	// Start the server
 	if err := r.Run(":8080"); err != nil {

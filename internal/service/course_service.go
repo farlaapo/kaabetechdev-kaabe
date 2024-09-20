@@ -25,12 +25,10 @@ type courseServiceImpl struct {
 	tokenRepo repository.TokenRepository
 }
 
-// GetCourseByID implements CourseService.
-
 // NewCourseService creates a new instance of CourseService
-func NewCourseService(repo repository.CourseRepository, tokenRepo repository.TokenRepository) CourseService {
+func NewCourseService(coureRepo repository.CourseRepository, tokenRepo repository.TokenRepository) CourseService {
 	return &courseServiceImpl{
-		repo:      repo,
+		repo:      coureRepo,
 		tokenRepo: tokenRepo,
 	}
 }
@@ -67,7 +65,7 @@ func (s *courseServiceImpl) CreateCourse(Title string, Description string, Durat
 // UpdateCourse updates an existing course
 func (s *courseServiceImpl) UpdateCourse(course *entity.Course) error {
 	// Add your update logic here using s.repo
-	_, err := s.repo.FindByID(course.ID)
+	_, err := s.repo.GetdByID(course.ID)
 	if err != nil {
 		// If the course does not exist, return the error
 		return fmt.Errorf("could not find user with ID %s", course.ID)
@@ -83,7 +81,7 @@ func (s *courseServiceImpl) UpdateCourse(course *entity.Course) error {
 
 // DeleteCourse deletes a course by its ID
 func (s *courseServiceImpl) DeleteCourse(courseID uuid.UUID) error {
-	_, err := s.repo.FindByID(courseID)
+	_, err := s.repo.GetdByID(courseID)
 	if err != nil {
 		// If the user does not exist, return the error
 		fmt.Printf("Could not find user with ID %s: %v", courseID, err)
@@ -102,7 +100,7 @@ func (s *courseServiceImpl) DeleteCourse(courseID uuid.UUID) error {
 
 func (s *courseServiceImpl) GetCourseByID(courseID uuid.UUID) (*entity.Course, error) {
 	// Call the repository to find the course by its ID
-	course, err := s.repo.FindByID(courseID)
+	course, err := s.repo.GetdByID(courseID)
 	if err != nil {
 		return nil, fmt.Errorf("could not find user with ID %d: %v", courseID, err)
 	}
