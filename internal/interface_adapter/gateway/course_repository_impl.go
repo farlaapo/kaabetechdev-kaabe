@@ -14,7 +14,7 @@ type CourseRepositoryImpl struct {
 	db *sql.DB
 }
 
-// Delete implements repository.CourseRepository.
+//  factory function to create an instance of CourseRepository
 
 func NewCourseRepository(db *sql.DB) repository.CourseRepository {
 	return &CourseRepositoryImpl{db: db}
@@ -29,25 +29,27 @@ func (r *CourseRepositoryImpl) Create(course *entity.Course) error {
 	}
 	course.ID = newUUID
 
+	// Log the course information before the insert
+	log.Printf("Inserting course: %+v", course)
+
 	// SQL Query to insert the course into the database
-	query := `
-		INSERT INTO courses (id, title, description, duration, created_at, updated_at)
-		VALUES($1, $2, $3, $4, $5, $6)
-		`
-	result, err := r.db.Exec(query, course.ID, course.Title, course.Description, course.Duration, course.CreatedAt, course.UpdatedAt)
+	query := `INSERT INTO courses (id, title, description, duration, version, category, enrolled_count, content_url, outline, status, created_at, updated_at)
+        VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12 )`
+
+	result, err := r.db.Exec(query, course.ID, course.Title, course.Description, course.Duration, course.Version, course.Category, course.EnrolledCount, course.ContentURL, course.Outline, course.Status, course.CreatedAt, course.UpdatedAt)
 	if err != nil {
-		log.Printf("Error inserting course: %v", err)
+		log.Printf("Error inserting course: %v, query: %s", err, query)
 		return err
 	}
 
 	// Check rows affected
-	rowsAAffected, err := result.RowsAffected()
+	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		log.Printf("Error fetching rows affected: %v", err)
 		return err
 	}
 
-	log.Printf("Rows affected: %d\n", rowsAAffected)
+	log.Printf("Rows affected: %d\n", rowsAffected)
 	return nil
 }
 
@@ -55,10 +57,10 @@ func (r *CourseRepositoryImpl) Create(course *entity.Course) error {
 func (r *CourseRepositoryImpl) Update(course *entity.Course) error {
 	// Define the SQL update query
 	query := `UPDATE courses
-			  SET title = $1, description = $2, duration = $3, updated_at = 4,
-			  WHERE id = $5`
+			  SET  title = $1, description = $2, duration = $3, version = $4, category = $5,  enrolled_count = $6, content_url = $7, outline = $8, status = $9,  updated_at =  $10
+			  WHERE id = $11`
 	// Execute the update query with the course data
-	result, err := r.db.Exec(query, course.Title, course.Description, course.Duration, course.UpdatedAt, course.ID)
+	result, err := r.db.Exec(query, course.Title, course.Description, course.Duration, course.Version, course.Category, course.EnrolledCount, course.ContentURL, course.Outline, course.Status, course.UpdatedAt, course.ID)
 	if err != nil {
 		log.Printf("Error updating course with ID: %v, error: %v", course.ID, err)
 		return err
@@ -111,9 +113,9 @@ func (r *CourseRepositoryImpl) GetdByID(courseID uuid.UUID) (*entity.Course, err
 	var course = entity.Course{}
 
 	// Fetch the course from the database using the provided ID
-	err := r.db.QueryRow(`SELECT id, title, description, duration, created_at, updated_at
+	err := r.db.QueryRow(`SELECT id, title, description, duration, version, category,  enrolled_count, content_url, outline, status, created_at, updated_at
 	FROM courses WHERE id = $1`, courseID).Scan(
-		&course.ID, &course.Title, &course.Description, &course.Duration, &course.CreatedAt, &course.UpdatedAt)
+		&course.ID, &course.Title, &course.Description, &course.Duration, &course.Version, &course.Category, &course.EnrolledCount, &course.ContentURL, &course.Outline, &course.Status, &course.CreatedAt, &course.UpdatedAt)
 
 	// Check for errors in retrieving the course
 	if err != nil {

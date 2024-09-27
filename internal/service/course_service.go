@@ -4,16 +4,15 @@ import (
 	"dalabio/internal/entity"
 	"dalabio/internal/repository"
 	"fmt"
+	"log"
 	"time"
-
-	"errors"
 
 	"github.com/gofrs/uuid"
 )
 
 // CourseService interface
 type CourseService interface {
-	CreateCourse(Title, Description, Duration string) (*entity.Course, error)
+	CreateCourse(Title, Description, Duration, Category, ContentUR, Outline, Status string, EnrolledCount int, version uuid.UUID) (*entity.Course, error)
 	UpdateCourse(course *entity.Course) error
 	DeleteCourse(courseID uuid.UUID) error
 	GetCourseByID(courseID uuid.UUID) (*entity.Course, error)
@@ -36,20 +35,33 @@ func NewCourseService(coureRepo repository.CourseRepository, tokenRepo repositor
 // func (s *courseServiceImpl) CreateCourse(Title string, Description string, Duration string) (*entity.Course, error) {
 
 // }
-func (s *courseServiceImpl) CreateCourse(Title string, Description string, Duration string) (*entity.Course, error) {
-	// Create a new course instance
+func (s *courseServiceImpl) CreateCourse(Title, Description, Duration, Category, ContentUR, Outline, Status string, EnrolledCount int, version uuid.UUID) (*entity.Course, error) {
+
+	// Generate a new UUID for the course ID
 	neoCourse, err := uuid.NewV4()
 	if err != nil {
-		return nil, errors.New("failed to generate token")
+		return nil, err
 	}
+
+	// Create a new course instance
 	newCourse := &entity.Course{
-		ID:          neoCourse, // assuming Course has an ID of type uuid.UUID
+		ID:          neoCourse,
 		Title:       Title,
 		Description: Description,
 		Duration:    Duration,
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
+		Version:     version, // Use the provided version, not neoCourse.
+		Category:    Category,
+		// Use the passed instructor ID.
+		EnrolledCount: EnrolledCount,
+		ContentURL:    ContentUR,
+		Outline:       Outline,
+		Status:        Status,
+		CreatedAt:     time.Now(),
+		UpdatedAt:     time.Now(),
 	}
+
+	// Log the new course creation attempt
+	log.Printf("Creating course: %+v", newCourse)
 
 	// Save the new course to the repository
 	err = s.repo.Create(newCourse)

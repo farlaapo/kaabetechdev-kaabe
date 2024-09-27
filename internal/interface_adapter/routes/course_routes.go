@@ -14,11 +14,11 @@ func RegisterCoursesRoutes(router *gin.Engine, courseController *controller.Cour
 
 	courseGroup := router.Group("/")
 	{
-		courseGroup.POST("/courses", courseController.CreateCourse)
 
 		// Protected routes (require valid authentication)
 		courseGroup.Use(authMiddleware)
 		{
+			courseGroup.POST("/courses", courseController.CreateCourse)
 			courseGroup.PUT("/courses/:id", courseController.UpdateCourse)
 			courseGroup.DELETE("/courses/:id", courseController.DeleteCourse)
 			courseGroup.GET("/courses/:id", courseController.GetCourseByID)

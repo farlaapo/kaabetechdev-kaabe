@@ -43,17 +43,22 @@ func CreateTables(db *sql.DB) error {
 		deleted_at TIMESTAMP NULL
 	);`
 
-	courseTable := ` CREATE TABLE IF NOT EXISTS courses (
-		id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-		user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-		title VARCHAR(255) NOT NULL,
-		description TEXT,
-		duration VARCHAR(255) NOT NULL,
-		created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-		updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-		deleted_at TIMESTAMP NULL
-	
-		)`
+	courseTable := `CREATE TABLE IF NOT EXISTS courses (
+	id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+	user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+	title VARCHAR(255) NOT NULL,
+	description TEXT,
+	duration VARCHAR(100) NOT NULL,
+	version UUID NOT NULL,
+	category VARCHAR(100) NOT NULL,
+	enrolled_count INT NOT NULL DEFAULT 0,  -- Changed to INT with a default value of 0
+	content_url TEXT,
+	outline TEXT,
+	status VARCHAR(50) NOT NULL,
+	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	deleted_at TIMESTAMP NULL
+);`
 
 	tokenTable := `CREATE TABLE IF NOT EXISTS tokens (
 		id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
