@@ -25,7 +25,7 @@ import (
 type Course struct {
 	ID            uuid.UUID  `json:"id,omitempty"`
 	Title         string     `json:"title" binding:"required"` // Still required in the request
-	Description   string     `json:"description"`
+	Description   string     `json:"description"`              // Not required in the request
 	Duration      string     `json:"duration"`
 	Version       uuid.UUID  `json:"version,omitempty"`
 	Category      string     `json:"category"`
