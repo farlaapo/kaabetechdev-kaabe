@@ -12,7 +12,7 @@ import (
 
 // CourseService interface
 type CourseService interface {
-	CreateCourse(Title, Description, Duration, Category, ContentUR, Outline, Status string, EnrolledCount int, version uuid.UUID) (*entity.Course, error)
+	CreateCourse(Title, Description, Duration, Category, Outline string, ContentURLs []string, Status string, EnrolledCount int, version uuid.UUID, instructorID uuid.UUID) (*entity.Course, error)
 	UpdateCourse(course *entity.Course) error
 	DeleteCourse(courseID uuid.UUID) error
 	GetCourseByID(courseID uuid.UUID) (*entity.Course, error)
@@ -32,11 +32,7 @@ func NewCourseService(coureRepo repository.CourseRepository, tokenRepo repositor
 	}
 }
 
-// func (s *courseServiceImpl) CreateCourse(Title string, Description string, Duration string) (*entity.Course, error) {
-
-// }
-func (s *courseServiceImpl) CreateCourse(Title, Description, Duration, Category, ContentUR, Outline, Status string, EnrolledCount int, version uuid.UUID) (*entity.Course, error) {
-
+func (s *courseServiceImpl) CreateCourse(Title, Description, Duration, Category, Outline string, ContentURLs []string, Status string, EnrolledCount int, version uuid.UUID, instructorID uuid.UUID) (*entity.Course, error) {
 	// Generate a new UUID for the course ID
 	neoCourse, err := uuid.NewV4()
 	if err != nil {
@@ -45,19 +41,19 @@ func (s *courseServiceImpl) CreateCourse(Title, Description, Duration, Category,
 
 	// Create a new course instance
 	newCourse := &entity.Course{
-		ID:          neoCourse,
-		Title:       Title,
-		Description: Description,
-		Duration:    Duration,
-		Version:     version, // Use the provided version, not neoCourse.
-		Category:    Category,
-		// Use the passed instructor ID.
+		ID:            neoCourse,
+		Title:         Title,
+		Description:   Description,
+		Duration:      Duration,
+		Version:       version,
+		Category:      Category,
+		InstructorID:  instructorID, // Make sure you pass the instructorID
 		EnrolledCount: EnrolledCount,
-		ContentURL:    ContentUR,
+		ContentURL:    ContentURLs,
 		Outline:       Outline,
 		Status:        Status,
-		CreatedAt:     time.Now(),
-		UpdatedAt:     time.Now(),
+		CreatedAt:     time.Now(), // Set created_at
+		UpdatedAt:     time.Now(), // Set updated_at
 	}
 
 	// Log the new course creation attempt
@@ -72,20 +68,15 @@ func (s *courseServiceImpl) CreateCourse(Title, Description, Duration, Category,
 	return newCourse, nil
 }
 
-// GetCourseByID implements CourseService.
-
 // UpdateCourse updates an existing course
 func (s *courseServiceImpl) UpdateCourse(course *entity.Course) error {
-	// Add your update logic here using s.repo
 	_, err := s.repo.GetdByID(course.ID)
 	if err != nil {
-		// If the course does not exist, return the error
-		return fmt.Errorf("could not find user with ID %s", course.ID)
+		return fmt.Errorf("could not find course with ID %s", course.ID)
 	}
 
-	// Call the repository to update the user
 	if err := s.repo.Update(course); err != nil {
-		return fmt.Errorf("failed to update user with ID %s: %v", course.ID, err)
+		return fmt.Errorf("failed to update course with ID %s: %v", course.ID, err)
 	}
 
 	return nil
@@ -95,28 +86,23 @@ func (s *courseServiceImpl) UpdateCourse(course *entity.Course) error {
 func (s *courseServiceImpl) DeleteCourse(courseID uuid.UUID) error {
 	_, err := s.repo.GetdByID(courseID)
 	if err != nil {
-		// If the user does not exist, return the error
-		fmt.Printf("Could not find user with ID %s: %v", courseID, err)
-		return fmt.Errorf("could not find user with ID %s", courseID)
+		return fmt.Errorf("could not find course with ID %s: %v", courseID, err)
 	}
 
-	// Call the repository to delete the user
 	if err := s.repo.Delete(courseID); err != nil {
-		fmt.Printf("Failed to delete user with ID %s: %v", courseID, err)
-		return fmt.Errorf("failed to delete user with ID %s: %v", courseID, err)
+		return fmt.Errorf("failed to delete course with ID %s: %v", courseID, err)
 	}
 
-	fmt.Printf("Successfully deleted user with ID %s", courseID)
+	log.Printf("Successfully deleted course with ID %s", courseID)
 	return nil
 }
 
+// GetCourseByID retrieves a course by its ID
 func (s *courseServiceImpl) GetCourseByID(courseID uuid.UUID) (*entity.Course, error) {
-	// Call the repository to find the course by its ID
 	course, err := s.repo.GetdByID(courseID)
 	if err != nil {
-		return nil, fmt.Errorf("could not find user with ID %d: %v", courseID, err)
+		return nil, fmt.Errorf("could not find course with ID %s: %v", courseID, err)
 	}
 
 	return course, nil
-
 }

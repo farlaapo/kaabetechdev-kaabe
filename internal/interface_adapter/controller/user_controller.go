@@ -125,3 +125,26 @@ func (uc *UserController) DeleteUser(c *gin.Context) {
 	// Respond with success
 	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
 }
+
+func (uc *UserController) GetUserByID(c *gin.Context) {
+
+	// Get the user ID from the URL parameter
+	userIDParam := c.Param("id")
+	userID, err := uuid.FromString(userIDParam)
+	if err != nil {
+		log.Printf("Invalid user ID: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	// Call the service layer to handle user deletion
+	user, err := uc.userService.GetUserByID(userID)
+	if err != nil {
+		log.Printf("Error deleting user: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Respond with success
+	c.JSON(http.StatusOK, gin.H{"user": user})
+}

@@ -1,24 +1,22 @@
 package entity
 
 import (
-	// "database/sql/driver"
-	// "encoding/json"
-	// "fmt"
 	"time"
 
 	"github.com/gofrs/uuid"
 )
 
-// Add custom marshal/unmarshal methods to the ContentURL field
+// Course represents the structure of a course entity
 type Course struct {
 	ID            uuid.UUID  `json:"id,omitempty"`
-	Title         string     `json:"title" binding:"required"` // Still required in the request
-	Description   string     `json:"description"`              // Not required in the request
+	Title         string     `json:"title" binding:"required"`
+	Description   string     `json:"description"`
 	Duration      string     `json:"duration"`
 	Version       uuid.UUID  `json:"version,omitempty"`
 	Category      string     `json:"category"`
+	InstructorID  uuid.UUID  `json:"instructor_id" binding:"required"` // Added InstructorID field
 	EnrolledCount int        `json:"enrolled_count,omitempty"`
-	ContentURL    string     `json:"content_url"`
+	ContentURL    []string   `json:"content_url"` // Changed to a slice of strings
 	Outline       string     `json:"outline,omitempty"`
 	Status        string     `json:"status"`
 	CreatedAt     time.Time  `json:"created_at"`

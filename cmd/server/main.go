@@ -47,14 +47,17 @@ func main() {
 	userRepository := gateway.NewUserRepository(database)
 	tokenRepository := gateway.NewTokenRepository(database)
 	courseRepository := gateway.NewCourseRepository(database)
+	SpaceRepository := gateway.NewSpaceRepository(database)
 
 	// Initialize the services
 	userService := service.NewUserService(userRepository, tokenRepository)
 	courseService := service.NewCourseService(courseRepository, tokenRepository)
+	spaceService := service.NewSpaceService(SpaceRepository, tokenRepository)
 
 	// Initialize the controllers
 	userController := controller.NewUserController(userService)
 	courseController := controller.NewCourseController(courseService)
+	spaceController := controller.NewSpaceController(spaceService)
 
 	// Initialize Gin router
 	r := gin.Default()
@@ -71,6 +74,7 @@ func main() {
 	// Register user-related routes with token repository for middleware
 	routes.RegisterUserRoutes(r, userController, tokenRepository)
 	routes.RegisterCoursesRoutes(r, courseController, tokenRepository)
+	routes.RegisterSpacesRoutes(r, spaceController, tokenRepository)
 
 	// Start the server
 	if err := r.Run(":8080"); err != nil {

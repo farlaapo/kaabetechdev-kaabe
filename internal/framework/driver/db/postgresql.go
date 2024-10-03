@@ -44,20 +44,35 @@ func CreateTables(db *sql.DB) error {
 	);`
 
 	courseTable := `CREATE TABLE IF NOT EXISTS courses (
-	id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-	user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-	title VARCHAR(255) NOT NULL,
-	description TEXT,
-	duration VARCHAR(100) NOT NULL,
-	version UUID NOT NULL,
-	category VARCHAR(100) NOT NULL,
-	enrolled_count INT NOT NULL DEFAULT 0,  -- Changed to INT with a default value of 0
-	content_url TEXT,
-	outline TEXT,
-	status VARCHAR(50) NOT NULL,
-	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	deleted_at TIMESTAMP NULL
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    instructor_id UUID REFERENCES users(id) ON DELETE CASCADE,  -- Added instructor_id with foreign key constraint
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    duration VARCHAR(100) NOT NULL,
+    version UUID NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    enrolled_count INT NOT NULL DEFAULT 0,  -- INT with a default value of 0
+    content_url TEXT[],  -- Change to TEXT[] for array of URLs
+    outline TEXT,
+    status VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL
+);`
+
+	spaceTable := `CREATE TABLE IF NOT EXISTS spaces (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),     -- Unique identifier for the space
+    name VARCHAR(255) NOT NULL,                         -- The name of the space
+    description TEXT,                                   -- A brief description of the space
+    coach_id UUID REFERENCES users(id) ON DELETE CASCADE, -- Foreign key to the users table (coach)
+    member_count UUID,                                  -- UUID for tracking the number of members (this can be adjusted if needed)
+    session_count UUID,                                 -- UUID for tracking the number of sessions (this can be adjusted if needed)
+    course_count UUID,                                  -- UUID for tracking the number of courses (this can be adjusted if needed)
+    active BOOLEAN DEFAULT TRUE,                        -- Indicates if the space is active or disabled
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,  -- Time of creation
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,  -- Time of last update
+    deleted_at TIMESTAMP NULL                           -- Soft deletion timestamp
 );`
 
 	tokenTable := `CREATE TABLE IF NOT EXISTS tokens (
@@ -97,7 +112,7 @@ func CreateTables(db *sql.DB) error {
 	);`
 
 	// Execute the table creation queries
-	queries := []string{userTable, tokenTable, roleTable, permissionTable, userRoleTable, userPermissionTable, courseTable}
+	queries := []string{userTable, tokenTable, roleTable, permissionTable, userRoleTable, userPermissionTable, courseTable, spaceTable}
 	for _, query := range queries {
 		if _, err := db.Exec(query); err != nil {
 			return fmt.Errorf("failed to create table: %v", err)

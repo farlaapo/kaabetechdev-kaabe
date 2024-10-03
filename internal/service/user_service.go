@@ -20,7 +20,7 @@ type UserService interface {
 	// DeactivateUser(userID uint) error
 	// ActivateUser(userID uint) error
 	DeleteUser(userID uuid.UUID) error
-	// GetUserByID(userID uint) (*entity.User, error)
+	GetUserByID(userID uuid.UUID) (*entity.User, error)
 	// GetUserByEmail(email string) (*entity.User, error)
 	// ListUsers() ([]*entity.User, error)
 	AuthenticateUser(email, password string) (*entity.User, error)
@@ -30,6 +30,18 @@ type UserService interface {
 type userServiceImpl struct {
 	repo      repository.UserRepository
 	tokenRepo repository.TokenRepository
+}
+
+// GetUserByID implements UserService.
+func (s *userServiceImpl) GetUserByID(userID uuid.UUID) (*entity.User, error) {
+
+	user, err := s.repo.FindByID(userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user with ID %s: %v", userID, err)
+	}
+
+	return user, nil
+
 }
 
 // NewUserService creates a new UserService instance.

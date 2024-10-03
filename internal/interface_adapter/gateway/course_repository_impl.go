@@ -8,6 +8,7 @@ import (
 	"log"
 
 	"github.com/gofrs/uuid"
+	"github.com/lib/pq"
 )
 
 type CourseRepositoryImpl struct {
@@ -21,22 +22,15 @@ func NewCourseRepository(db *sql.DB) repository.CourseRepository {
 }
 
 func (r *CourseRepositoryImpl) Create(course *entity.Course) error {
-	// Generate UUID for the course
-	newUUID, err := uuid.NewV4()
-	if err != nil {
-		log.Printf("Error generating UUID: %v", err)
-		return err
-	}
-	course.ID = newUUID
-
 	// Log the course information before the insert
 	log.Printf("Inserting course: %+v", course)
 
 	// SQL Query to insert the course into the database
-	query := `INSERT INTO courses (id, title, description, duration, version, category, enrolled_count, content_url, outline, status, created_at, updated_at)
-        VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12 )`
+	query := `INSERT INTO courses (id, title, description, duration, version, category, instructor_id, enrolled_count, content_url, outline, status, created_at, updated_at)
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`
 
-	result, err := r.db.Exec(query, course.ID, course.Title, course.Description, course.Duration, course.Version, course.Category, course.EnrolledCount, course.ContentURL, course.Outline, course.Status, course.CreatedAt, course.UpdatedAt)
+	// Use pq.Array() to pass the slice of strings as a PostgreSQL array
+	result, err := r.db.Exec(query, course.ID, course.Title, course.Description, course.Duration, course.Version, course.Category, course.InstructorID, course.EnrolledCount, pq.Array(course.ContentURL), course.Outline, course.Status, course.CreatedAt, course.UpdatedAt)
 	if err != nil {
 		log.Printf("Error inserting course: %v, query: %s", err, query)
 		return err
@@ -57,10 +51,10 @@ func (r *CourseRepositoryImpl) Create(course *entity.Course) error {
 func (r *CourseRepositoryImpl) Update(course *entity.Course) error {
 	// Define the SQL update query
 	query := `UPDATE courses
-			  SET  title = $1, description = $2, duration = $3, version = $4, category = $5,  enrolled_count = $6, content_url = $7, outline = $8, status = $9,  updated_at =  $10
-			  WHERE id = $11`
+			  SET  title = $1, description = $2, duration = $3, version = $4, category = $5, instructor_id = $6 enrolled_count = $7, content_url = $8, outline = $9, status = $10,  updated_at =  $11
+			  WHERE id = $12`
 	// Execute the update query with the course data
-	result, err := r.db.Exec(query, course.Title, course.Description, course.Duration, course.Version, course.Category, course.EnrolledCount, course.ContentURL, course.Outline, course.Status, course.UpdatedAt, course.ID)
+	result, err := r.db.Exec(query, course.Title, course.Description, course.Duration, course.Version, course.Category, course.EnrolledCount, course.InstructorID, course.ContentURL, course.Outline, course.Status, course.UpdatedAt, course.ID)
 	if err != nil {
 		log.Printf("Error updating course with ID: %v, error: %v", course.ID, err)
 		return err
@@ -113,7 +107,7 @@ func (r *CourseRepositoryImpl) GetdByID(courseID uuid.UUID) (*entity.Course, err
 	var course = entity.Course{}
 
 	// Fetch the course from the database using the provided ID
-	err := r.db.QueryRow(`SELECT id, title, description, duration, version, category,  enrolled_count, content_url, outline, status, created_at, updated_at
+	err := r.db.QueryRow(`SELECT id, title, description, duration, version, category, instructor_id,  enrolled_count, content_url, outline, status, created_at, updated_at
 	FROM courses WHERE id = $1`, courseID).Scan(
 		&course.ID, &course.Title, &course.Description, &course.Duration, &course.Version, &course.Category, &course.EnrolledCount, &course.ContentURL, &course.Outline, &course.Status, &course.CreatedAt, &course.UpdatedAt)
 
@@ -121,7 +115,7 @@ func (r *CourseRepositoryImpl) GetdByID(courseID uuid.UUID) (*entity.Course, err
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Printf("No course found with ID: %v", courseID)
-			return nil, fmt.Errorf("Course Not Found")
+			return nil, fmt.Errorf("course Not Found")
 		}
 		log.Printf("Error retrieving course by ID: %v", err)
 	}
