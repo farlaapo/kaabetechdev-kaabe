@@ -56,11 +56,7 @@ func (r *CourseRepositoryImpl) Update(course *entity.Course) error {
     WHERE id = $1`,
 		course.ID, course.Title, course.Description, course.Duration, course.Version, course.Category, course.EnrolledCount, pq.Array(course.ContentURL), course.Status)
 	log.Printf("ContentURL: %+v", course.ContentURL)
-	// query := `UPDATE courses
-	// 		  SET  title = $1, description = $2, duration = $3, version = $4, category = $5, instructor_id = $6 enrolled_count = $7, content_url = $8, outline = $9, status = $10,  updated_at =  $11
-	// 		  WHERE id = $12`
-	// // Execute the update query with the course data
-	// result, err := r.db.Exec(query, course.Title, course.Description, course.Duration, course.Version, course.Category, course.EnrolledCount, course.InstructorID, course.ContentURL, course.Outline, course.Status, course.UpdatedAt, course.ID)
+
 	if err != nil {
 		log.Printf("Error updating course with ID: %v, error: %v", course.ID, err)
 		return err
