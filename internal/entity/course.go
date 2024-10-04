@@ -14,7 +14,7 @@ type Course struct {
 	Duration      string     `json:"duration"`
 	Version       uuid.UUID  `json:"version,omitempty"`
 	Category      string     `json:"category"`
-	InstructorID  uuid.UUID  `json:"instructor_id" binding:"required"` // Added InstructorID field
+	InstructorID  uuid.UUID  `json:"instructor_id,omitempty"` // Added InstructorID field
 	EnrolledCount int        `json:"enrolled_count,omitempty"`
 	ContentURL    []string   `json:"content_url"` // Changed to a slice of strings
 	Outline       string     `json:"outline,omitempty"`

@@ -50,15 +50,22 @@ func (r *CourseRepositoryImpl) Create(course *entity.Course) error {
 // Update implements repository.CourseRepository.
 func (r *CourseRepositoryImpl) Update(course *entity.Course) error {
 	// Define the SQL update query
-	query := `UPDATE courses
-			  SET  title = $1, description = $2, duration = $3, version = $4, category = $5, instructor_id = $6 enrolled_count = $7, content_url = $8, outline = $9, status = $10,  updated_at =  $11
-			  WHERE id = $12`
-	// Execute the update query with the course data
-	result, err := r.db.Exec(query, course.Title, course.Description, course.Duration, course.Version, course.Category, course.EnrolledCount, course.InstructorID, course.ContentURL, course.Outline, course.Status, course.UpdatedAt, course.ID)
+	result, err := r.db.Exec(`
+    UPDATE courses 
+    SET title = $2, description = $3, duration = $4, version = $5, category = $6, enrolled_count = $7, content_url = $8, status = $9, updated_at = CURRENT_TIMESTAMP 
+    WHERE id = $1`,
+		course.ID, course.Title, course.Description, course.Duration, course.Version, course.Category, course.EnrolledCount, pq.Array(course.ContentURL), course.Status)
+	log.Printf("ContentURL: %+v", course.ContentURL)
+	// query := `UPDATE courses
+	// 		  SET  title = $1, description = $2, duration = $3, version = $4, category = $5, instructor_id = $6 enrolled_count = $7, content_url = $8, outline = $9, status = $10,  updated_at =  $11
+	// 		  WHERE id = $12`
+	// // Execute the update query with the course data
+	// result, err := r.db.Exec(query, course.Title, course.Description, course.Duration, course.Version, course.Category, course.EnrolledCount, course.InstructorID, course.ContentURL, course.Outline, course.Status, course.UpdatedAt, course.ID)
 	if err != nil {
 		log.Printf("Error updating course with ID: %v, error: %v", course.ID, err)
 		return err
 	}
+
 	// If no rows were affected, it means the course was not found
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
@@ -104,14 +111,27 @@ func (r *CourseRepositoryImpl) Delete(courseID uuid.UUID) error {
 // GetdByID implements repository.CourseRepository.
 func (r *CourseRepositoryImpl) GetdByID(courseID uuid.UUID) (*entity.Course, error) {
 	// Define the Course entity to store the result
-	var course = entity.Course{}
+	//  var course = entity.Course{}
+	var course entity.Course
+	query := "SELECT id, title, description, duration, version, category, instructor_id, enrolled_count, content_url, outline, status, created_at, updated_at, deleted_at FROM courses WHERE id = $1"
+	err := r.db.QueryRow(query, courseID).Scan(
+		&course.ID,
+		&course.Title,
+		&course.Description,
+		&course.Duration,
+		&course.Version,
+		&course.Category,
+		&course.InstructorID,
+		&course.EnrolledCount,
+		pq.Array(&course.ContentURL), // Use pq.Array for TEXT[] in PostgreSQL
+		&course.Outline,
+		&course.Status,
+		&course.CreatedAt,
+		&course.UpdatedAt,
+		&course.DeletedAt,
+	)
 
-	// Fetch the course from the database using the provided ID
-	err := r.db.QueryRow(`SELECT id, title, description, duration, version, category, instructor_id,  enrolled_count, content_url, outline, status, created_at, updated_at
-	FROM courses WHERE id = $1`, courseID).Scan(
-		&course.ID, &course.Title, &course.Description, &course.Duration, &course.Version, &course.Category, &course.EnrolledCount, &course.ContentURL, &course.Outline, &course.Status, &course.CreatedAt, &course.UpdatedAt)
-
-	// Check for errors in retrieving the course
+	//Check for errors in retrieving the course
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Printf("No course found with ID: %v", courseID)
@@ -119,7 +139,8 @@ func (r *CourseRepositoryImpl) GetdByID(courseID uuid.UUID) (*entity.Course, err
 		}
 		log.Printf("Error retrieving course by ID: %v", err)
 	}
-	//	// Return the Course if found
+
+	// Return the Course if found
 	return &course, nil
 
 }
