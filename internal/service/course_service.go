@@ -16,6 +16,7 @@ type CourseService interface {
 	UpdateCourse(course *entity.Course) error
 	DeleteCourse(courseID uuid.UUID) error
 	GetCourseByID(courseID uuid.UUID) (*entity.Course, error)
+	GetAllCourses() ([]*entity.Course, error)
 }
 
 // courseServiceImpl struct implementing CourseService
@@ -30,6 +31,18 @@ func NewCourseService(coureRepo repository.CourseRepository, tokenRepo repositor
 		repo:      coureRepo,
 		tokenRepo: tokenRepo,
 	}
+}
+
+// GetAllCourses implements CourseService.
+func (s *courseServiceImpl) GetAllCourses() ([]*entity.Course, error) {
+	course, err := s.repo.GetAll()
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all courses: %v", err)
+	}
+
+	return course, nil
+
 }
 
 func (s *courseServiceImpl) CreateCourse(Title, Description, Duration, Category, Outline string, ContentURLs []string, Status string, EnrolledCount int, version uuid.UUID, instructorID uuid.UUID) (*entity.Course, error) {

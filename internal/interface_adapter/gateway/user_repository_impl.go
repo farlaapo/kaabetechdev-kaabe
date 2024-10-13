@@ -173,11 +173,6 @@ func (r *userRepositoryImpl) FindByEmail(email string) (*entity.User, error) {
 
 // ListAll lists all users in the database.
 func (r *userRepositoryImpl) ListAll() ([]*entity.User, error) {
-	panic("unimplemented")
-}
-
-// get all users
-func (r *userRepositoryImpl) GetAll() ([]*entity.User, error) {
 
 	// Fetch all users from the database
 	rows, err := r.db.Query("SELECT id, username, email, password, first_name, last_name, is_active, created_at, updated_at FROM users")
@@ -199,4 +194,5 @@ func (r *userRepositoryImpl) GetAll() ([]*entity.User, error) {
 
 	// Check for any errors during the scan
 	return users, nil
+
 }

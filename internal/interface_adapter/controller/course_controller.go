@@ -123,3 +123,15 @@ func (cc *CourseController) GetCourseByID(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, course)
 }
+
+func (cc *CourseController) GetAllCourses(ctx *gin.Context) {
+
+	// Call service to get courses
+	courses, err := cc.courseService.GetAllCourses()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	// respond success
+	ctx.JSON(http.StatusOK, courses)
+}

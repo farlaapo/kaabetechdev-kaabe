@@ -22,7 +22,7 @@ type UserService interface {
 	DeleteUser(userID uuid.UUID) error
 	GetUserByID(userID uuid.UUID) (*entity.User, error)
 	// GetUserByEmail(email string) (*entity.User, error)
-	// ListUsers() ([]*entity.User, error)
+	ListUsers() ([]*entity.User, error)
 	AuthenticateUser(email, password string) (*entity.User, error)
 }
 
@@ -31,6 +31,18 @@ type userServiceImpl struct {
 	repo      repository.UserRepository
 	tokenRepo repository.TokenRepository
 }
+
+// ListUsers implements UserService.
+func (s *userServiceImpl) ListUsers() ([]*entity.User, error) {
+	users, err := s.repo.ListAll()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all users: %v", err)
+	}
+
+	return users, nil
+}
+
+// ListUsers implements UserService.
 
 // GetUserByID implements UserService.
 func (s *userServiceImpl) GetUserByID(userID uuid.UUID) (*entity.User, error) {

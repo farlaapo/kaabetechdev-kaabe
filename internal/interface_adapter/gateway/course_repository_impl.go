@@ -79,31 +79,6 @@ func (r *CourseRepositoryImpl) Update(course *entity.Course) error {
 
 }
 
-func (r *CourseRepositoryImpl) Delete(courseID uuid.UUID) error {
-	// SQL Query to insert the course into the database
-	query := `DELETE FROM courses WHERE id = $1`
-	result, err := r.db.Exec(query, courseID)
-	if err != nil {
-		log.Printf("Error deleting course with ID: %v, error: %v", courseID, err)
-		return err
-	}
-	// Check how many rows were affected by the delete
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		log.Printf("Error fetching rows affected: %v", err)
-		return err
-	}
-	// If no rows were affected, it means the course was not found
-	if rowsAffected == 0 {
-		log.Printf("No course found with ID: %v", courseID)
-		return nil
-	}
-
-	log.Printf("Deleted Course ID : %d\n", courseID)
-	return nil
-
-}
-
 // GetdByID implements repository.CourseRepository.
 func (r *CourseRepositoryImpl) GetdByID(courseID uuid.UUID) (*entity.Course, error) {
 	// Define the Course entity to store the result
@@ -138,5 +113,81 @@ func (r *CourseRepositoryImpl) GetdByID(courseID uuid.UUID) (*entity.Course, err
 
 	// Return the Course if found
 	return &course, nil
+
+}
+
+func (r *CourseRepositoryImpl) GetAll() ([]*entity.Course, error) {
+	// Define the Course slice to store the results
+	var courses []*entity.Course
+	query := `
+		SELECT id, title, description, duration, version, category, instructor_id, 
+		       enrolled_count, content_url, outline, status, created_at, updated_at, deleted_at 
+		FROM courses
+	`
+	rows, err := r.db.Query(query)
+	if err != nil {
+		log.Printf("Error retrieving courses: %v", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var course entity.Course
+		err := rows.Scan(
+			&course.ID,
+			&course.Title,
+			&course.Description,
+			&course.Duration,
+			&course.Version,
+			&course.Category,
+			&course.InstructorID,
+			&course.EnrolledCount,
+			pq.Array(&course.ContentURL), // Use pq.Array for TEXT[] in PostgreSQL
+			&course.Outline,
+			&course.Status,
+			&course.CreatedAt,
+			&course.UpdatedAt,
+			&course.DeletedAt,
+		)
+		if err != nil {
+			log.Printf("Error scanning course: %v", err)
+			return nil, err
+		}
+
+		// Append a pointer to the course to the courses slice
+		courses = append(courses, &course)
+	}
+
+	// Check for errors encountered during iteration
+	if err = rows.Err(); err != nil {
+		log.Printf("Error iterating over courses: %v", err)
+		return nil, err
+	}
+
+	return courses, nil
+}
+
+func (r *CourseRepositoryImpl) Delete(courseID uuid.UUID) error {
+	// SQL Query to insert the course into the database
+	query := `DELETE FROM courses WHERE id = $1`
+	result, err := r.db.Exec(query, courseID)
+	if err != nil {
+		log.Printf("Error deleting course with ID: %v, error: %v", courseID, err)
+		return err
+	}
+	// Check how many rows were affected by the delete
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Printf("Error fetching rows affected: %v", err)
+		return err
+	}
+	// If no rows were affected, it means the course was not found
+	if rowsAffected == 0 {
+		log.Printf("No course found with ID: %v", courseID)
+		return nil
+	}
+
+	log.Printf("Deleted Course ID : %d\n", courseID)
+	return nil
 
 }

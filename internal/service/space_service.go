@@ -22,6 +22,8 @@ type SpaceService interface {
 
 	// GetSpaceByID retrieves a space by its ID
 	GetSpaceByID(spaceID uuid.UUID) (*entity.Space, error)
+
+	GetAllSpaces() ([]*entity.Space, error)
 }
 
 // SpaceServiceImpl struct implementing CourseService
@@ -29,6 +31,17 @@ type SpaceService interface {
 type spaceServiceImpl struct {
 	repo      repository.SpaceRepository
 	tokenRepo repository.TokenRepository
+}
+
+// GetAll implements SpaceService.
+func (s *spaceServiceImpl) GetAllSpaces() ([]*entity.Space, error) {
+
+	spaces, err := s.repo.GetAll()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all spaces: %v", err)
+	}
+	return spaces, nil
+
 }
 
 // NewSpaceService creates a new instance of SpaceService

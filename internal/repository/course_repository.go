@@ -12,4 +12,5 @@ type CourseRepository interface {
 	Update(course *entity.Course) error
 	Delete(courseID uuid.UUID) error
 	GetdByID(courseID uuid.UUID) (*entity.Course, error)
+	GetAll() ([]*entity.Course, error)
 }

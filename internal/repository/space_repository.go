@@ -11,4 +11,5 @@ type SpaceRepository interface {
 	Update(space *entity.Space) error
 	Delete(spaceID uuid.UUID) error
 	GetdByID(spaceID uuid.UUID) (*entity.Space, error)
+	GetAll() ([]*entity.Space, error)
 }

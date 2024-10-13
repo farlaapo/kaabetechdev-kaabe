@@ -111,3 +111,13 @@ func (sc *SpaceController) GetSpaceByID(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, space)
 
 }
+
+func (sc *SpaceController) GetAllSpaces(ctx *gin.Context) {
+
+	// Call service to update space
+	spaces, err := sc.spaceService.GetAllSpaces()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+	ctx.JSON(http.StatusOK, spaces)
+}

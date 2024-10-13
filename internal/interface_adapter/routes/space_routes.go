@@ -19,6 +19,7 @@ func RegisterSpacesRoutes(router *gin.Engine, spaceController *controller.SpaceC
 			spaceGroup.PUT("/:id", spaceController.UpdateSpace)
 			spaceGroup.DELETE("/:id", spaceController.DeleteSpace)
 			spaceGroup.GET("/:id", spaceController.GetSpaceByID)
+			spaceGroup.GET("", spaceController.GetAllSpaces)
 
 		}
 	}

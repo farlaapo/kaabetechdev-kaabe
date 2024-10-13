@@ -89,6 +89,57 @@ func (r *spaceRepositoryImpl) GetdByID(spaceID uuid.UUID) (*entity.Space, error)
 	return &space, nil
 }
 
+func (r *spaceRepositoryImpl) GetAll() ([]*entity.Space, error) {
+	// Define a slice to store the Space entities
+	var spaces []*entity.Space
+
+	// Prepare the SQL statement
+	query := `
+		SELECT id, name, description, coach_id, member_count, session_count, 
+		       course_count, active, created_at, updated_at 
+		FROM spaces
+	`
+
+	// Execute the SQL statement
+	rows, err := r.db.Query(query)
+	if err != nil {
+		log.Printf("Error retrieving spaces: %v", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Iterate through the rows and scan each row into a Space entity
+	for rows.Next() {
+		var space entity.Space
+		err := rows.Scan(
+			&space.ID,
+			&space.Name,
+			&space.Description,
+			&space.CoachID,
+			&space.MemberCount,
+			&space.SessionCount,
+			&space.CourseCount,
+			&space.Active,
+			&space.CreatedAt,
+			&space.UpdatedAt,
+		)
+		if err != nil {
+			log.Printf("Error scanning row: %v", err)
+			return nil, err
+		}
+		// Append the space pointer to the spaces slice
+		spaces = append(spaces, &space)
+	}
+
+	// Check for any errors encountered during iteration
+	if err = rows.Err(); err != nil {
+		log.Printf("Error iterating over spaces: %v", err)
+		return nil, err
+	}
+
+	return spaces, nil
+}
+
 // Update implements repository.SpaceRepository.
 func (r *spaceRepositoryImpl) Update(space *entity.Space) error {
 	// Prepare the SQL statement

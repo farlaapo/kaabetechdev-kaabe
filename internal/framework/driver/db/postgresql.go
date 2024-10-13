@@ -45,7 +45,6 @@ func CreateTables(db *sql.DB) error {
 
 	courseTable := `CREATE TABLE IF NOT EXISTS courses (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     instructor_id UUID REFERENCES users(id) ON DELETE CASCADE,  -- Added instructor_id with foreign key constraint
     title VARCHAR(255) NOT NULL,
     description TEXT,
@@ -74,6 +73,28 @@ func CreateTables(db *sql.DB) error {
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,  -- Time of last update
     deleted_at TIMESTAMP NULL                           -- Soft deletion timestamp
 );`
+
+	meetingTable := `CREATE TABLE IF NOT EXISTS meetings (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    duration VARCHAR(50),  -- To handle various duration formats like "1h30m"
+    start_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP,
+    location VARCHAR(255),
+    attendee_ids UUID[],  -- UUID arrays are supported in PostgreSQL
+    attendee_names TEXT[],
+    attendee_emails TEXT[],
+    attendee_status TEXT[],
+    meeting_type VARCHAR(50),
+    status VARCHAR(50),
+    join_url TEXT[],
+    maximum_capacity INT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
+);
+`
 
 	tokenTable := `CREATE TABLE IF NOT EXISTS tokens (
 		id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -112,7 +133,7 @@ func CreateTables(db *sql.DB) error {
 	);`
 
 	// Execute the table creation queries
-	queries := []string{userTable, tokenTable, roleTable, permissionTable, userRoleTable, userPermissionTable, courseTable, spaceTable}
+	queries := []string{userTable, tokenTable, roleTable, permissionTable, userRoleTable, userPermissionTable, courseTable, spaceTable, meetingTable}
 	for _, query := range queries {
 		if _, err := db.Exec(query); err != nil {
 			return fmt.Errorf("failed to create table: %v", err)

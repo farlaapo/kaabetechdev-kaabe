@@ -148,3 +148,17 @@ func (uc *UserController) GetUserByID(c *gin.Context) {
 	// Respond with success
 	c.JSON(http.StatusOK, gin.H{"user": user})
 }
+
+func (uc *UserController) ListUsers(c *gin.Context) {
+
+	// Call the service layer to handle user deletion
+	users, err := uc.userService.ListUsers()
+	if err != nil {
+		log.Printf("Error deleting user: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Respond with success
+	c.JSON(http.StatusOK, gin.H{"users": users})
+}

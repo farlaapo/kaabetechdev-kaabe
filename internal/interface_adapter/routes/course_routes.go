@@ -12,16 +12,17 @@ func RegisterCoursesRoutes(router *gin.Engine, courseController *controller.Cour
 
 	authMiddleware := middleware.AuthMiddleware(tokenRepo)
 
-	courseGroup := router.Group("/")
+	courseGroup := router.Group("/courses")
 	{
 
 		// Protected routes (require valid authentication)
 		courseGroup.Use(authMiddleware)
 		{
-			courseGroup.POST("/courses", courseController.CreateCourse)
-			courseGroup.PUT("/courses/:id", courseController.UpdateCourse)
-			courseGroup.DELETE("/courses/:id", courseController.DeleteCourse)
-			courseGroup.GET("/courses/:id", courseController.GetCourseByID)
+			courseGroup.POST("", courseController.CreateCourse)
+			courseGroup.PUT("/:id", courseController.UpdateCourse)
+			courseGroup.DELETE("/:id", courseController.DeleteCourse)
+			courseGroup.GET("/:id", courseController.GetCourseByID)
+			courseGroup.GET("", courseController.GetAllCourses)
 		}
 	}
 
