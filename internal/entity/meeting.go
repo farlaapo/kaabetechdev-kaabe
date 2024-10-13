@@ -26,23 +26,3 @@ type Meeting struct {
 	UpdatedAt       time.Time   `json:"updated_at"`
 	DeletedAt       *time.Time  `json:"deleted_at,omitempty"` // For soft deletes
 }
-
-// type Meeting struct {
-// 	ID              uuid.UUID
-// 	Title           string
-// 	Description     string
-// 	Duration        string
-// 	StartTime       time.Time
-// 	EndTime         time.Time
-// 	Location        string
-// 	AttendeeIDs     []string
-// 	AttendeeNames   []string
-// 	AttendeeEmails  []string
-// 	AttendeeStatus  []string
-// 	MeetingType     string
-// 	Status          string
-// 	JoinURL         []string // Correct type for array
-// 	MaximumCapacity int
-// 	CreatedAt       time.Time
-// 	UpdatedAt       time.Time
-// }
