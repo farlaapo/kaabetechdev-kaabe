@@ -49,18 +49,21 @@ func main() {
 	courseRepository := gateway.NewCourseRepository(database)
 	SpaceRepository := gateway.NewSpaceRepository(database)
 	meetingRepository := gateway.NewMeetingRepository(database)
+	paymentRepository := gateway.NewPaymentRepository(database)
 
 	// Initialize the services
 	userService := service.NewUserService(userRepository, tokenRepository)
 	courseService := service.NewCourseService(courseRepository, tokenRepository)
 	spaceService := service.NewSpaceService(SpaceRepository, tokenRepository)
 	meetingService := service.NewMeetingService(meetingRepository, tokenRepository)
+	paymentService := service.NewPaymentService(paymentRepository, tokenRepository)
 
 	// Initialize the controllers
 	userController := controller.NewUserController(userService)
 	courseController := controller.NewCourseController(courseService)
 	spaceController := controller.NewSpaceController(spaceService)
 	meetingController := controller.NewMeetingController(meetingService)
+	paymentController := controller.NewPaymentController(paymentService)
 
 	// Initialize Gin router
 	r := gin.Default()
@@ -79,6 +82,7 @@ func main() {
 	routes.RegisterCoursesRoutes(r, courseController, tokenRepository)
 	routes.RegisterSpacesRoutes(r, spaceController, tokenRepository)
 	routes.RegisterMeetingRoutes(r, meetingController, tokenRepository)
+	routes.RegisterPaymentRoutes(r, paymentController, tokenRepository)
 
 	// Start the server
 	if err := r.Run(":8080"); err != nil {

@@ -84,11 +84,11 @@ func (s *meetingService) UpdateMeeting(meeting *entity.Meeting) error {
 	_, err := s.repo.GetdByID(meeting.ID)
 
 	if err != nil {
-		return fmt.Errorf("could not find course with ID %s", meeting.ID)
+		return fmt.Errorf("could not find meeeting with ID %s", meeting.ID)
 	}
 
 	if err := s.repo.Update(meeting); err != nil {
-		return fmt.Errorf("failed to update course with ID %s: %v", meeting.ID, err)
+		return fmt.Errorf("failed to update meeting with ID %s: %v", meeting.ID, err)
 	}
 
 	return nil
@@ -100,14 +100,14 @@ func (s *meetingService) DeleteMeeting(meetingID uuid.UUID) error {
 
 	_, err := s.repo.GetdByID(meetingID)
 	if err != nil {
-		return fmt.Errorf("could not find course with ID %s: %v", meetingID, err)
+		return fmt.Errorf("could not find meeting with ID %s: %v", meetingID, err)
 	}
 
 	if err := s.repo.Delete(meetingID); err != nil {
-		return fmt.Errorf("failed to delete course with ID %s: %v", meetingID, err)
+		return fmt.Errorf("failed to delete meeting with ID %s: %v", meetingID, err)
 	}
 
-	log.Printf("Successfully deleted course with ID %s", meetingID)
+	log.Printf("Successfully deleted meeting with ID %s", meetingID)
 	return nil
 }
 
@@ -116,7 +116,7 @@ func (s *meetingService) GetMeetingByID(meetingID uuid.UUID) (*entity.Meeting, e
 	meeting, err := s.repo.GetdByID(meetingID)
 
 	if err != nil {
-		return nil, fmt.Errorf("could not find course with ID %s: %v", meetingID, err)
+		return nil, fmt.Errorf("could not find meeting with ID %s: %v", meetingID, err)
 	}
 
 	return meeting, nil

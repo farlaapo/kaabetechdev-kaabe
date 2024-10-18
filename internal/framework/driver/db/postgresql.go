@@ -95,7 +95,24 @@ func CreateTables(db *sql.DB) error {
     deleted_at TIMESTAMP
 );
 `
+	paymentTable := `CREATE TABLE IF NOT EXISTS payments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+    order_id UUID, 
+    amount DECIMAL(10, 2) NOT NULL,
+    currency VARCHAR(10) NOT NULL,
+    payment_method VARCHAR(50) NOT NULL,
+    transaction_id VARCHAR(100) UNIQUE,
+    status VARCHAR(20) NOT NULL,
+    payment_gateway VARCHAR(50),
+    payment_date TIMESTAMP,
+    notes TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+`
 
+	// Create tokens table
 	tokenTable := `CREATE TABLE IF NOT EXISTS tokens (
 		id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
 		user_id UUID REFERENCES users(id) ON DELETE CASCADE,
@@ -133,7 +150,7 @@ func CreateTables(db *sql.DB) error {
 	);`
 
 	// Execute the table creation queries
-	queries := []string{userTable, tokenTable, roleTable, permissionTable, userRoleTable, userPermissionTable, courseTable, spaceTable, meetingTable}
+	queries := []string{userTable, tokenTable, roleTable, permissionTable, userRoleTable, userPermissionTable, courseTable, spaceTable, meetingTable, paymentTable}
 	for _, query := range queries {
 		if _, err := db.Exec(query); err != nil {
 			return fmt.Errorf("failed to create table: %v", err)
